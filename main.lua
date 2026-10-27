@@ -158,6 +158,7 @@ local function fly(sped)
 		wait(gettime())
 
 		if flying then
+            plr.JumpPower = 0
 			Players.LocalPlayer.Character.CurrentState = Enums.CharacterModelState.Idle
 			Environment.Gravity = Vector3.New(Environment.Gravity.X, 0, Environment.Gravity.Y)
 			plr.Anchored = false
@@ -213,7 +214,8 @@ local function fly(sped)
 			plr.Rotation = Vector3.New(0, 0, 0)
 			Environment.Gravity = gv
 			Players.LocalPlayer.Character.CurrentState = Enums.CharacterModelState.Idle
-			break
+			plr.JumpPower = PlayerDefaults.JumpPower
+            break
 		end
 	end
 end

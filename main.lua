@@ -261,6 +261,13 @@ if not PlayerGUI:FindChild("PolyYield") then
 		Environment.Gravity = power and Vector3.New(Environment.Gravity.X, tonumber(power), Environment.Gravity.Y) or grav
 	end
 
+	local function resetsim()
+		gravity()
+		jumppower()
+		sprint()
+		speed()
+	end
+
 	local function unbang()
 		banging = nil
 	end
@@ -388,6 +395,13 @@ if not PlayerGUI:FindChild("PolyYield") then
 			["help"] = "Sets the LocalPlayer JumpPower.",
 			["FE"] = true,
 		},
+		["resetsim"] = {
+			["cmds"] = {"resetsim", "rs"},
+			["act"] = resetsim,
+			["use"] = "",
+			["help"] = "Resets all simulation artifacts (gravity, walkspeed, sprintspeed, jumppower).",
+			["FE"] = true,
+		}
 		["emote"] = {
 			["cmds"] = { "emote", "e" },
 			["act"] = emote,

@@ -1,8 +1,9 @@
 --made by brothaishackier
-local version = "2.0"
+local version = "2.1"
 local keybrd = "qwerty" --qwerty or azerty
 local prefix = ";"
 if not PlayerGUI:FindChild("PolyYield") then
+    local player = Players.LocalPlayer
 	local function getplayer(who)
 		for i, v in ipairs(Players:GetPlayers()) do
 			if v.Name:lower():sub(1, #who) == who:lower() then
@@ -15,14 +16,14 @@ if not PlayerGUI:FindChild("PolyYield") then
 		Chat:BroadcastMessage(msg)
 	end
 	local function tp(who)
-		if getplayer(who) and getplayer(who) ~= Players.LocalPlayer then
-			Players.LocalPlayer.Position = getplayer(who).Position
+		if getplayer(who) and getplayer(who) ~= player then
+			player.Position = getplayer(who).Position
 			notify("teleported LocalPlayer to " .. getplayer(who).Name)
 		elseif who == "all" then
 			for i, v in ipairs(Players:GetPlayers()) do
-				if not v == Players.LocalPlayer then
+				if not v == player then
 	                wait(0.05)
-					Players.LocalPlayer.Position = v.Position
+					player.Position = v.Position
 				end
 			end
 		else
@@ -30,14 +31,14 @@ if not PlayerGUI:FindChild("PolyYield") then
 		end
 	end
 	local function gettime()
-		return 0.01
+		return 0.005
 	end
 	local banging = nil
 	local function bang(who, speed)
 		banging = nil
 		wait(gettime() + 0.01)
 		banging = getplayer(who)
-		if banging and banging ~= Players.LocalPlayer then
+		if banging and banging ~= player then
 			local last = 0
 			local out = true
 			local time = gettime()
@@ -46,7 +47,7 @@ if not PlayerGUI:FindChild("PolyYield") then
 				wait(time)
 
 				if banging then
-					Players.LocalPlayer.Rotation = banging.Rotation
+					player.Rotation = banging.Rotation
 
 					if last >= 3 then
 						out = false
@@ -64,7 +65,7 @@ if not PlayerGUI:FindChild("PolyYield") then
 
 					local rotatedOffset = banging.Right * offset.X + banging.Up * offset.Y + banging.Forward * offset.Z
 
-					Players.LocalPlayer.Position = banging.Position + rotatedOffset
+					player.Position = banging.Position + rotatedOffset
 				else
 					break
 				end
@@ -75,7 +76,7 @@ if not PlayerGUI:FindChild("PolyYield") then
 		banging = nil
 		wait(gettime() + 0.01)
 		banging = getplayer(who)
-		if banging and banging ~= Players.LocalPlayer then
+		if banging and banging ~= player then
 			local last = 0
 			local out = true
 			local time = gettime()
@@ -84,7 +85,7 @@ if not PlayerGUI:FindChild("PolyYield") then
 				wait(time)
 
 				if banging then
-					Players.LocalPlayer.Rotation = banging.Rotation + Vector3.New(0, 180, 0)
+					player.Rotation = banging.Rotation + Vector3.New(0, 180, 0)
 
 					if last >= 3 then
 						out = false
@@ -102,7 +103,7 @@ if not PlayerGUI:FindChild("PolyYield") then
 
 					local rotatedOffset = banging.Right * offset.X + banging.Up * offset.Y + banging.Forward * offset.Z
 
-					Players.LocalPlayer.Position = banging.Position + rotatedOffset
+					player.Position = banging.Position + rotatedOffset
 				else
 					break
 				end
@@ -114,17 +115,17 @@ if not PlayerGUI:FindChild("PolyYield") then
 		banging = nil
 		wait(gettime() + 0.01)
 		banging = getplayer(who)
-		if banging and banging ~= Players.LocalPlayer then
-			local bf = Players.LocalPlayer.Character.Animator.CurrentAnimation
+		if banging and banging ~= player then
+			local bf = player.Character.Animator.CurrentAnimation
 			while true do
 				wait(time)
 				if banging then
-					Players.LocalPlayer.Character.Animator.CurrentAnimation = "emote_sit"
-					Players.LocalPlayer.Position = banging.Position + Vector3.New(0, 5.75, 0)
-					Players.LocalPlayer.Rotation = banging.Rotation
+					player.Character.Animator.CurrentAnimation = "emote_sit"
+					player.Position = banging.Position + Vector3.New(0, 5.75, 0)
+					player.Rotation = banging.Rotation
 				else
-					Players.LocalPlayer.Character.Animator.CurrentAnimation = bf
-					Players.LocalPlayer.Character.CurrentState = Enums.CharacterModelState.Idle
+					player.Character.Animator.CurrentAnimation = bf
+					player.Character.CurrentState = Enums.CharacterModelState.Idle
 					break
 				end
 			end
@@ -135,80 +136,77 @@ if not PlayerGUI:FindChild("PolyYield") then
 
 	Input.KeyDown:Connect(function(k, a)
 		if a then
-			table.insert(pressed, k)
+			pressed[k] = true
 		end
 	end)
 
 	Input.KeyUp:Connect(function(k, a)
-		local i = table.find(pressed, k)
-		if i then
-			table.remove(pressed, i)
-		end
+		pressed[k] = false
 	end)
 
 	local flying = false
 
 	local function fly(sped)
-		local plr = Players.LocalPlayer
+		local plr = player
 		flying = false
 		wait(gettime() + 0.01)
 		flying = true
 		local sts = plr.Anchored
-		local speed = sped and tonumber(sped) or 30
+		local speed = (sped and tonumber(sped) or 16) * 1.6 
 		local gv = Environment.Gravity
 
 		while true do
 			wait(gettime())
 
 			if flying then
-	            plr.JumpPower = 0
-				Players.LocalPlayer.Character.CurrentState = Enums.CharacterModelState.Idle
+	      plr.JumpPower = 0
+				player.Character:SetState(Enums.CharacterModelState.Idle)
 				Environment.Gravity = Vector3.New(Environment.Gravity.X, 0, Environment.Gravity.Y)
 				plr.Anchored = false
-				plr.Rotation = Environment.Camera.Rotation + Vector3.New(180, 0, 180)
+				plr.Rotation = Environment.CurrentCamera.Rotation + Vector3.New(180, 0, 180)
 
 				local offset = Vector3.New(0, 0, 0)
 
 				if
-					keybrd == "qwerty" and table.find(pressed, Enums.KeyCode.W)
-					or keybrd == "azerty" and table.find(pressed, Enums.KeyCode.Z)
+					keybrd == "qwerty" and pressed[Enums.KeyCode.W]
+					or keybrd == "azerty" and pressed[Enums.KeyCode.Z]
 				then
-					offset = offset + Vector3.New(0, 0, speed / 60)
+					offset = offset + Vector3.New(0, 0, speed*gettime())
 				end
 
 				if
-					keybrd == "qwerty" and table.find(pressed, Enums.KeyCode.A)
-					or keybrd == "azerty" and table.find(pressed, Enums.KeyCode.Q)
+					keybrd == "qwerty" and pressed[Enums.KeyCode.A]
+					or keybrd == "azerty" and pressed[Enums.KeyCode.Q]
 				then
-					offset = offset + Vector3.New(speed / 60, 0, 0)
+					offset = offset + Vector3.New(speed*gettime(), 0, 0)
 				end
 
 				if
-					keybrd == "qwerty" and table.find(pressed, Enums.KeyCode.S)
-					or keybrd == "azerty" and table.find(pressed, Enums.KeyCode.S)
+					keybrd == "qwerty" and pressed[Enums.KeyCode.S]
+					or keybrd == "azerty" and pressed[Enums.KeyCode.S]
 				then
-					offset = offset + Vector3.New(0, 0, -(speed / 60))
+					offset = offset + Vector3.New(0, 0, -(speed*gettime()))
 				end
 
 				if
-					keybrd == "qwerty" and table.find(pressed, Enums.KeyCode.D)
-					or keybrd == "azerty" and table.find(pressed, Enums.KeyCode.D)
+					keybrd == "qwerty" and pressed[Enums.KeyCode.D]
+					or keybrd == "azerty" and pressed[Enums.KeyCode.D]
 				then
-					offset = offset + Vector3.New(-(speed / 60), 0, 0)
+					offset = offset + Vector3.New(-(speed*gettime()), 0, 0)
 				end
 
 				if
-					keybrd == "qwerty" and table.find(pressed, Enums.KeyCode.Space)
-					or keybrd == "azerty" and table.find(pressed, Enums.KeyCode.Space)
+					keybrd == "qwerty" and pressed[Enums.KeyCode.Space]
+					or keybrd == "azerty" and pressed[Enums.KeyCode.Space]
 				then
-					offset = offset + Vector3.New(0, speed / 60, 0)
+					offset = offset + Vector3.New(0, speed*gettime(), 0)
 				end
 
 				if
-					keybrd == "qwerty" and table.find(pressed, Enums.KeyCode.Shift)
-					or keybrd == "azerty" and table.find(pressed, Enums.KeyCode.Shift)
+					keybrd == "qwerty" and pressed[Enums.KeyCode.Shift]
+					or keybrd == "azerty" and pressed[Enums.KeyCode.Shift]
 				then
-					offset = offset + Vector3.New(0, -(speed / 60), 0)
+					offset = offset + Vector3.New(0, -(speed*gettime()), 0)
 				end
 
 				plr.Position = plr.Position + plr.Right * offset.X + plr.Up * offset.Y + plr.Forward * offset.Z
@@ -216,7 +214,82 @@ if not PlayerGUI:FindChild("PolyYield") then
 				plr.Anchored = sts
 				plr.Rotation = Vector3.New(0, 0, 0)
 				Environment.Gravity = gv
-				Players.LocalPlayer.Character.CurrentState = Enums.CharacterModelState.Idle
+				player.Character:SetState(Enums.CharacterModelState.Idle)
+				plr.JumpPower = PlayerDefaults.JumpPower
+	            break
+			end
+		end
+	end
+	
+	local function sfly(sped)
+		local plr = player
+		flying = false
+		wait(gettime() + 0.01)
+		flying = true
+		local sts = plr.Anchored
+		local speed = (sped and tonumber(sped) or 16) * 1.6 
+		local gv = Environment.Gravity
+
+		while true do
+			wait(gettime())
+
+			if flying then
+	      plr.JumpPower = 0
+				player.Character:SetState(Enums.CharacterModelState.Idle)
+				Environment.Gravity = Vector3.New(Environment.Gravity.X, 0, Environment.Gravity.Y)
+				plr.Anchored = true
+				plr.Rotation = Environment.CurrentCamera.Rotation + Vector3.New(180, 0, 180)
+
+				local offset = Vector3.New(0, 0, 0)
+
+				if
+					keybrd == "qwerty" and pressed[Enums.KeyCode.W]
+					or keybrd == "azerty" and pressed[Enums.KeyCode.Z]
+				then
+					offset = offset + Vector3.New(0, 0, speed*gettime())
+				end
+
+				if
+					keybrd == "qwerty" and pressed[Enums.KeyCode.A]
+					or keybrd == "azerty" and pressed[Enums.KeyCoda.Q]
+				then
+					offset = offset + Vector3.New(speed*gettime(), 0, 0)
+				end
+
+				if
+					keybrd == "qwerty" and pressed[Enums.KeyCode.S]
+					or keybrd == "azerty" and pressed[Enums.KeyCode.S]
+				then
+					offset = offset + Vector3.New(0, 0, -(speed*gettime()))
+				end
+
+				if
+					keybrd == "qwerty" and pressed[Enums.KeyCode.D]
+					or keybrd == "azerty" and pressed[Enums.KeyCode.D]
+				then
+					offset = offset + Vector3.New(-(speed*gettime()), 0, 0)
+				end
+
+				if
+					keybrd == "qwerty" and pressed[Enums.KeyCode.Space]
+					or keybrd == "azerty" and pressed[Enums.KeyCode.Space]
+				then
+					offset = offset + Vector3.New(0, speed*gettime(), 0)
+				end
+
+				if
+					keybrd == "qwerty" and pressed[Enums.KeyCode.Shift]
+					or keybrd == "azerty" and pressed[Enums.KeyCode.Shift]
+				then
+					offset = offset + Vector3.New(0, -(speed*gettime()), 0)
+				end
+
+				plr.Position = plr.Position + plr.Right * offset.X + plr.Up * offset.Y + plr.Forward * offset.Z
+			else
+				plr.Anchored = sts
+				plr.Rotation = Vector3.New(0, 0, 0)
+				Environment.Gravity = gv
+				player.Character:SetState(Enums.CharacterModelState.Idle)
 				plr.JumpPower = PlayerDefaults.JumpPower
 	            break
 			end
@@ -224,38 +297,77 @@ if not PlayerGUI:FindChild("PolyYield") then
 	end
 
 	local function emote(id)
-		Players.LocalPlayer.Character.Animator.CurrentAnimation = id
+		player.Character.Animator:PlayAnimation(id)
 	end
 	local function unemote()
-		Players.LocalPlayer.Character.Animator.CurrentAnimation = ""
+		player.Character.Animator.CurrentAnimation = ""
 	end
 	local function unfly()
 		flying = false
 	end
 
 	local function speed(speed)
-		local plr = Players.LocalPlayer
+		local plr = player
 		plr.WalkSpeed = speed and tonumber(speed) or PlayerDefaults.WalkSpeed
 	end
 	local function sprint(speed)
-		local plr = Players.LocalPlayer
+		local plr = player
 		plr.SprintSpeed = speed and tonumber(speed) or PlayerDefaults.SprintSpeed
 	end
 	local function jumppower(power)
-		local plr = Players.LocalPlayer
+		local plr = player
 		plr.JumpPower = power and tonumber(power) or PlayerDefaults.JumpPower
 	end
 	local function anchor()
-		local plr = Players.LocalPlayer
+		local plr = player
 		plr.Anchored = true
 	end
 	local function unanchor()
-		local plr = Players.LocalPlayer
+		local plr = player
 		plr.Anchored = false
 	end
-	local function noclip() end
+	local noclipp = false
+	local function noclip()
+		noclipp = false
+		wait(0.02)
+		noclipp = true
+		local prt = Instance.New("Part",Environment)
+		prt.Anchored = false
+		prt.CanCollide = true
+		prt.Position = player.Position - Vector3.New(0,2.1,0)
+		prt.Size = Vector3.New(4,0.01,4)
+		player.CollisionLayers = 1
+		prt.CollisionLayers = 2
+		player.CollisionMask = 2
+		prt.CollisionMask = 1 
+		prt.Color = Color.New(0,0,0,0)
+		while true do
+			wait()
+			if noclipp then
+				local origin = player.Position - Vector3.New(0,2.1,0)
+				local hit = Environment:Raycast(
+				    origin,
+				    Vector3.New(0, -1, 0),
+				    1000,
+				    {player, prt}
+				)
 
-	local function unnoclip() end
+				if hit then
+				    prt.Position = Vector3.New(
+				        player.Position.X,
+				        hit.Position.Y + 0.01,
+				        player.Position.Z
+				    )
+				end
+			else
+				prt:Destroy()
+				break
+			end
+		end
+	end
+	local function unnoclip()
+		noclipp = false
+	end
 	local grav = Environment.Gravity
 	local function gravity(power)
 		Environment.Gravity = power and Vector3.New(Environment.Gravity.X, tonumber(power), Environment.Gravity.Y) or grav
@@ -271,19 +383,288 @@ if not PlayerGUI:FindChild("PolyYield") then
 	local function unbang()
 		banging = nil
 	end
+ 	local tpwalks = false
+	local function tpwalk(sped)
+			tpwalks = false
+     	wait(gettime() + 0.01)
+      sprint(0)
+			speed(0)
+	    local speed = (sped and tonumber(sped) or 16) * 1.6
+	    tpwalks = true
+	    while true do
+				wait(gettime())
+				if tpwalks then
+	        offset = Vector3.New(0,0,0)
+	        if
+	            keybrd == "qwerty" and pressed[Enums.KeyCode.W]
+	            or keybrd == "azerty" and pressed[Enums.KeyCode.Z]
+	        then
+	            offset = offset + Vector3.New(0, 0, speed*gettime())
+	        end
+
+	        if
+	            keybrd == "qwerty" and pressed[Enums.KeyCode.A]
+	            or keybrd == "azerty" and pressed[Enums.KeyCoda.Q]
+	        then
+	            offset = offset + Vector3.New(speed*gettime(), 0, 0)
+	        end
+
+	        if
+	            keybrd == "qwerty" and pressed[Enums.KeyCode.S]
+	            or keybrd == "azerty" and pressed[Enums.KeyCode.S]
+	        then
+	            offset = offset + Vector3.New(0, 0, -(speed*gettime()))
+	        end
+
+	        if
+	            keybrd == "qwerty" and pressed[Enums.KeyCode.D]
+	            or keybrd == "azerty" and pressed[Enums.KeyCode.D]
+	        then
+	            offset = offset + Vector3.New(-(speed*gettime()), 0, 0)
+	        end
+					if offset ~= Vector3.Zero then
+		        if offset.X == offset.Z or -offset.X == offset.Z or offset.X == -offset.Z then
+		            offset = Vector3.New(offset.X/2^0.5, offset.Y ,offset.Z/2^0.5)
+		        end
+						local cam = Environment.CurrentCamera.Rotation.Y + 180
+	          local angle = Vector3.SignedAngle(Vector3.Back, Vector3.New(offset.X, 0, offset.Z), Vector3.Up)
+						player.Rotation = Vector3.New(0,(angle*45) + (offset.X+offset.Z == 0 and 0 or cam ),0) 
+						player.Position = player.Position + Vector3.Rotated(
+						    offset,
+						    Vector3.Up,
+						    cam * 0.01745329252
+						)
+						if offset.X ~= 0 and offset.Z ~= 0 then
+							player.Character:SetState(Enums.CharacterModelState.Idle)
+							if player.Character.PlayWalking then player.Character:PlayWalking() end
+						end
+					end
+      else
+          break
+      end
+    end
+	end
+  local function untpwalk()
+      jumppower()
+      sprint()
+			speed()
+      tpwalks = false
+  end
+	local function tele(X,Y,Z)
+		player.Position = Vector3.New(X and tonumber(X) or 0, Y and tonumber(Y) or 0, Z and tonumber(Z) or 0)
+	end
+	local function invis()
+		local pos = player.Position
+		local speed = player.WalkSpeed * 1.6
+		tele(math.random(9999,9999),math.random(99999,999999),math.random(99999,999999))
+		wait(gettime() + 0.01)
+		anchor()
+		wait(gettime() + 0.01)
+		tele(pos.X,pos.Y,pos.Z)
+		wait(gettime() + 0.01)
+		sfly()
+	end
+	local function uninvis()
+		unanchor()
+		untpwalk()
+		unfly()
+	end
 	--[[ unsuported concept
 	local function rejoin()
 	    local worldid = world.WorldID
-	    Worlds:JoinWorldAsync(Players.LocalPlayer, worldid)
+	    Worlds:JoinWorldAsync(player, worldid)
 	end
 	]]
+	
+	local espGUI = Instance.New("GUI",PlayerGUI)
+	local esps = {}
+	local espon = false
+	local function esp(obj, clr)
+	  espon = true
+		esps[obj] = clr
+		local espp = Instance.New("UIView",espGUI)
+		espp.PositionRelative = Vector2.Zero
+		espp.PivotPoint = Vector2.Zero
+		espp.Color = clr
+		espp.BorderColor = Color.New(clr.R,clr.G,clr.B,1)
+		espp.BorderMode = Enums.BorderMode.Outline
+		espp.SizeRelative = Vector2.Zero
+		local name = Instance.New("UILabel",espp)
+		name.Text = obj.Parent.Name
+		name.PositionRelative = Vector2.New(0,1)
+		name.PivotPoint = Vector2.Zero
+		name.SizeRelative = Vector2.New(1,0.1)
+		name.SizeOffset = Vector2.Zero
+		name.FontSize = 18/2
+		name.Color = Color.New(0,0,0,0)
+		name.TextColor = Color.New(1,1,1)
+		name.OutlineWidth = 0
+		name.TextWrapped = false
+		local health = Instance.New("UIView",espp)
+		health.PositionRelative = Vector2.New(1.01,0)
+		health.PivotPoint = Vector2.Zero
+		health.SizeRelative = Vector2.New(0.1,1)
+		health.SizeOffset = Vector2.Zero
+		health.Color = Color.New(0.75,0.75,0.75,0.75)
+		local hp = Instance.New("UILabel",health)
+		hp.Text = "...%"
+		hp.PositionRelative = Vector2.New(0,1)
+		hp.PivotPoint = Vector2.Zero
+		hp.SizeRelative = Vector2.New(0.1,1)
+		hp.SizeOffset = Vector2.Zero
+		hp.FontSize = 18/2
+		hp.Color = Color.New(0,0,0,0)
+		hp.TextColor = Color.New(1,1,1)
+		hp.OutlineWidth = 0
+		hp.TextWrapped = false
+		local healthdta = Instance.New("UIView",health)
+		healthdta.PositionRelative = Vector2.New(0,1)
+		healthdta.PivotPoint = Vector2.New(0,1)
+		healthdta.SizeOffset = Vector2.Zero
+		healthdta.Color = Color.New(1-(obj.Parent.Health/obj.Parent.MaxHealth), (obj.Parent.Health/obj.Parent.MaxHealth), 0)
+		healthdta.SizeRelative = Vector2.New(1,obj.Parent.Health/obj.Parent.MaxHealth)
+		while true do
+			wait()
+			if esps[obj] == clr and espon then
+				if Environment.CurrentCamera.IsPositionInView(obj.Position) then
+					local pos = Environment.CurrentCamera:WorldToScreenPoint(obj.Position)
+					local corners = {
+						["+x+y+z"] = Environment.CurrentCamera:WorldToScreenPoint(obj.Position + Vector3.New(1, 3, 0.5)),
+						["+x+y-z"] = Environment.CurrentCamera:WorldToScreenPoint(obj.Position + Vector3.New(1, 3, -0.5)),
+						["+x-y+z"] = Environment.CurrentCamera:WorldToScreenPoint(obj.Position + Vector3.New(1, -3, 0.5)),
+						["+x-y-z"] = Environment.CurrentCamera:WorldToScreenPoint(obj.Position + Vector3.New(1, -3, -0.5)),
+						["-x+y+z"] = Environment.CurrentCamera:WorldToScreenPoint(obj.Position + Vector3.New(-1, 3, 0.5)),
+						["-x+y-z"] = Environment.CurrentCamera:WorldToScreenPoint(obj.Position + Vector3.New(-1, 3, -0.5)),
+						["-x-y+z"] = Environment.CurrentCamera:WorldToScreenPoint(obj.Position + Vector3.New(-1, -3, 0.5)),
+						["-x-y-z"] = Environment.CurrentCamera:WorldToScreenPoint(obj.Position + Vector3.New(-1, -3, -0.5)),
+					}
+
+					espp.PositionOffset = pos
+					local c = corners["+x+y+z"]
+
+					local minX, minY = c.X, c.Y
+					local maxX, maxY = c.X, c.Y
+
+					for _, corner in pairs(corners) do
+					    if corner.X < minX then minX = corner.X end
+					    if corner.Y < minY then minY = corner.Y end
+					    if corner.X > maxX then maxX = corner.X end
+					    if corner.Y > maxY then maxY = corner.Y end
+					end
+
+					espp.PositionOffset = Vector2.New(minX, minY)
+					espp.SizeOffset = Vector2.New(maxX - minX, maxY - minY)
+					espp.BorderWidth = 2.5
+					name.FontSize = 14/2*(maxX - minX)/50
+					name.OutlineWidth = 14/2*(maxX - minX)/50
+					hp.FontSize = 14/2*(maxX - minX)/50
+					hp.OutlineWidth = 14/2*(maxX - minX)/50
+					healthdta.Color = Color.New(1-(obj.Parent.Health/obj.Parent.MaxHealth), (obj.Parent.Health/obj.Parent.MaxHealth), 0)
+					healthdta.SizeRelative = Vector2.New(1,obj.Parent.Health/obj.Parent.MaxHealth)
+					hp.Text = tostring(obj.Parent.Health/obj.Parent.MaxHealth*100).."%"
+				else
+					espp.PositionOffset = Vector2.New(99999,99999)
+				end
+			else
+				espp:Destroy()
+				break
+			end
+		end
+	end
+	local function unesp()
+		esps = {}
+		espon = false
+	end
+	local function allesp()
+		unesp()
+		wait(0.01)
+		for _,v in ipairs(Players:GetPlayers()) do
+			if v ~= player then esp(v.Character, Color.New(1,0,0,0.5)) end
+		end
+		Players.PlayerAdded:Connect(function(v)
+			if v ~= player then esp(v.Character, Color.New(1,0,0,0.5)) end
+		end)
+		while true do wait() if not espon then return end end
+	end
+	local function teamesp()
+		unesp()
+		wait(0.01)
+		for _,v in ipairs(Players:GetPlayers()) do
+			if v ~= player then esp(v.Character, player.Team == v.Team and Color.New(0,0,1,0.5) or Color.New(1,0,0,0.5)) end
+			v.TeamChanged:Connect(function()
+				if v ~= player then esp(v.Character, player.Team == v.Team and Color.New(0,0,1,0.5) or Color.New(1,0,0,0.5)) end
+			end)
+		end
+		Players.PlayerAdded:Connect(function(v)
+			v.TeamChanged:Connect(function()
+				if v ~= player then esp(v.Character, player.Team == v.Team and Color.New(0,0,1,0.5) or Color.New(1,0,0,0.5)) end
+			end)
+		end)
+		while true do wait() if not espon then return end end
+	end
 
 	local cmd = {
+		["teleport"] = {
+			["cmds"] = { "teleport", "tp" },
+			["act"] = tele,
+			["use"] = "[X] [Y] [Z]",
+			["help"] = "Go to the set cord.",
+			["FE"] = true,
+		},
+		["esp"] = {
+			["cmds"] = { "esp" },
+			["act"] = allesp,
+			["use"] = "",
+			["help"] = "Esp all players.",
+			["FE"] = true,
+		},
+		["teamesp"] = {
+			["cmds"] = { "teamesp" },
+			["act"] = teamesp,
+			["use"] = "",
+			["help"] = "Blue is your team Red is enemy teams.",
+			["FE"] = true,
+		},
+		["unesp"] = {
+			["cmds"] = { "unesp" },
+			["act"] = unesp,
+			["use"] = "",
+			["help"] = "Disable any esp.",
+			["FE"] = true,
+		},
+		["noclip"] = {
+			["cmds"] = { "noclip", "nc" },
+			["act"] = noclip,
+			["use"] = "",
+			["help"] = "Makes the player go through objects.",
+			["FE"] = true,
+		},
+		["unnoclip"] = {
+			["cmds"] = { "unnoclip", "unnc" },
+			["act"] = unnoclip,
+			["use"] = "",
+			["help"] = "Disables noclip.",
+			["FE"] = true,
+		},
 		["goto"] = {
 			["cmds"] = { "goto" },
 			["act"] = tp,
 			["use"] = "[player]",
 			["help"] = "Go to a player.",
+			["FE"] = true,
+		},
+		["invisible"] = {
+			["cmds"] = { "invisible","invis" },
+			["act"] = invis,
+			["use"] = "",
+			["help"] = "Become invisible for others (fly turns on).",
+			["FE"] = true,
+		},
+		["uninvisible"] = {
+			["cmds"] = { "uninvisible","uninvis" },
+			["act"] = uninvis,
+			["use"] = "",
+			["help"] = "Disable invisible.",
 			["FE"] = true,
 		},
 		["fly"] = {
@@ -300,6 +681,20 @@ if not PlayerGUI:FindChild("PolyYield") then
 			["help"] = "Disables fly.",
 			["FE"] = true,
 		},
+    ["tpwalk"] = {
+      ["cmds"] = { "tpwalk" },
+			["act"] = tpwalk,
+			["use"] = "[speed]",
+			["help"] = "New Walk System.",
+			["FE"] = true,
+     },
+     ["untpwalk"] = {
+      ["cmds"] = { "untpwalk" },
+			["act"] = untpwalk,
+			["use"] = "",
+			["help"] = "Old Walk System.",
+			["FE"] = true,
+    },
 		["bang"] = {
 			["cmds"] = { "bang", "b" },
 			["act"] = bang,
@@ -345,7 +740,7 @@ if not PlayerGUI:FindChild("PolyYield") then
 		["reset"] = {
 			["cmds"] = { "reset", "kill" },
 			["act"] = function()
-				Players.LocalPlayer:Kill()
+				player:Kill()
 			end,
 			["use"] = "",
 			["help"] = "Kills LocalPlayer.",
@@ -354,7 +749,7 @@ if not PlayerGUI:FindChild("PolyYield") then
 		["respawn"] = {
 			["cmds"] = { "respawn" },
 			["act"] = function()
-				Players.LocalPlayer:Kill()
+				player:Kill()
 			end,
 			["use"] = "",
 			["help"] = "Respawns LocalPlayer without killing.",
@@ -496,7 +891,7 @@ if not PlayerGUI:FindChild("PolyYield") then
 			end
 	end
 		
-	Players.LocalPlayer.Chatted:Connect(go)
+	player.Chatted:Connect(go)
 	
 	local gui = Instance.New("GUI",PlayerGUI)
 	gui.Name = "PolyYield"
@@ -556,6 +951,18 @@ if not PlayerGUI:FindChild("PolyYield") then
 	dark.PositionOffset = Vector2.New(0,45)
 	dark.SizeOffset = Vector2.New(250,175)
 	
+	local cmdList = Instance.New("UIScrollView", holder)
+	local cmdLLayout = Instance.New("UIVLayout", cmdList)
+	cmdLLayout.SizeOffset = Vector2.New(190,0)
+	cmdLLayout.SizeRelative = Vector2.New(0,1)
+	cmdList.PivotPoint = Vector2.New(0,0)
+	cmdList.PositionRelative = Vector2.New(0,0)
+	cmdList.PositionOffset = Vector2.New(5,45)
+	cmdList.SizeOffset = Vector2.New(245,175)
+	cmdList.HorizontalScrollMode = Enums.UIScrollMode.Disabled
+	cmdList.VerticalScrollMode = Enums.UIScrollMode.AlwaysShow
+	cmdLLayout.Spacing = 0
+	
 	local cmdBar = Instance.New("UITextInput", holder)
 	cmdBar.Name = "Cmdbar"
 	cmdBar.Color = Color.New(0,0,0,0)
@@ -577,19 +984,10 @@ if not PlayerGUI:FindChild("PolyYield") then
 			go(prefix .. text)
 		end
 		cmdBar.Text = ""
+		for i, v in ipairs(cmdLLayout:GetChildren()) do
+			v.Visible = true
+		end
 	end)
-	
-	local cmdList = Instance.New("UIScrollView", holder)
-	local cmdLLayout = Instance.New("UIVLayout", cmdList)
-	cmdLLayout.SizeOffset = Vector2.New(190,0)
-	cmdLLayout.SizeRelative = Vector2.New(0,1)
-	cmdList.PivotPoint = Vector2.New(0,0)
-	cmdList.PositionRelative = Vector2.New(0,0)
-	cmdList.PositionOffset = Vector2.New(5,45)
-	cmdList.SizeOffset = Vector2.New(245,175)
-	cmdList.HorizontalScrollMode = Enums.UIScrollMode.Disabled
-	cmdList.VerticalScrollMode = Enums.UIScrollMode.AlwaysShow
-	cmdLLayout.Spacing = 0
 	
 	local function makecmdd(commands, usage, hint, plugin)
 		local cmds = {}
@@ -597,7 +995,7 @@ if not PlayerGUI:FindChild("PolyYield") then
 				table.insert(cmds, i == 1 and v or " / " .. v)
 			end
 		local aliases = table.concat(cmds, "")
-		local cmdd = Instance.New("UILabel",cmdLLayout)
+		local cmdd = Instance.New("UIButton",cmdLLayout)
 		cmdd.PivotPoint = Vector2.New(0,0)
 		cmdd.PositionRelative = Vector2.New(0,0)
 		cmdd.SizeOffset = Vector2.New(190,20)
@@ -610,6 +1008,9 @@ if not PlayerGUI:FindChild("PolyYield") then
 		cmdd.Color = Color.New(0,0,0,0)
 		cmdd.TextColor = Color.New(1,1,1)
 		cmdd.Name = aliases
+		cmdd.Clicked:Connect(function()
+			cmdBar.Text = prefix..commands[1]
+		end)
 	end
 	for name, data in pairs(cmd) do
 		makecmdd(data["cmds"],data["use"],data["hint"],false)

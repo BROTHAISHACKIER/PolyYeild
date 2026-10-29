@@ -360,6 +360,7 @@ if not PlayerGUI:FindChild("PolyYield") then
 				    )
 				end
 			else
+				player.CollisionMask = 1
 				prt:Destroy()
 				break
 			end

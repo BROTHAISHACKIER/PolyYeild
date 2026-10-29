@@ -401,7 +401,7 @@ if not PlayerGUI:FindChild("PolyYield") then
 			["use"] = "",
 			["help"] = "Resets all simulation artifacts (gravity, walkspeed, sprintspeed, jumppower).",
 			["FE"] = true,
-		}
+		},
 		["emote"] = {
 			["cmds"] = { "emote", "e" },
 			["act"] = emote,
